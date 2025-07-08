@@ -1,0 +1,1 @@
+drop table orders_service.users;

@@ -1,0 +1,1 @@
+drop schema orders_service
