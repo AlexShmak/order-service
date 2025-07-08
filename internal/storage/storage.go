@@ -7,6 +7,11 @@ import (
 )
 
 type PostgresStorage struct {
+	Users interface {
+		Create(user *models.User) error
+		Delete(user *models.User) error
+		GetByID(id int64) (*models.User, error)
+	}
 	OrdersAdmin interface {
 		Create(order *models.Order) error
 		DeleteByID(id int64) error
@@ -19,6 +24,7 @@ type PostgresStorage struct {
 
 func NewPostgresStorage(adminDB *sql.DB, regularDB *sql.DB) *PostgresStorage {
 	return &PostgresStorage{
+		Users:         &UsersRepository{db: adminDB},
 		OrdersAdmin:   &OrdersRepositoryAdmin{db: adminDB},
 		OrdersRegular: &OrdersRepositoryRegular{db: regularDB},
 	}
