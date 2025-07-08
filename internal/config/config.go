@@ -12,6 +12,12 @@ type Config struct {
 	Environment string         `env:"ENV" env-default:"local"`
 	Database    DatabaseConfig `env-prefix:"DB_"`
 	Server      ServerConfig   `env-prefix:"SERVER_"`
+	JWT         JWT
+}
+
+type JWT struct {
+	AccessSecret  string `env:"ACCESS_SECRET" env-required:"true"`
+	RefreshSecret string `env:"REFRESH_SECRET" env-required:"true"`
 }
 
 type DatabaseConfig struct {

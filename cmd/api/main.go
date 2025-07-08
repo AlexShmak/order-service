@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/AlexShmak/wb_test_task_l0/internal/auth"
 	"log"
 	"log/slog"
 
@@ -47,7 +48,8 @@ func main() {
 	postgresStorage := storage.NewPostgresStorage(regularDB, adminDB)
 
 	// setup router
-	r := router.NewRouter(postgresStorage, slogLogger)
+	jwtService := auth.NewJWTService(cfg.JWT.AccessSecret, cfg.JWT.RefreshSecret)
+	r := router.NewRouter(postgresStorage, slogLogger, jwtService)
 	if err := r.Run(cfg.Server.Host + cfg.Server.Port); err != nil {
 		log.Panicf("Error starting r: %s", err)
 	}

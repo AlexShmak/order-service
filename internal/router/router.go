@@ -1,6 +1,8 @@
 package router
 
 import (
+	"github.com/AlexShmak/wb_test_task_l0/internal/auth"
+	"github.com/AlexShmak/wb_test_task_l0/internal/handlers"
 	"log/slog"
 	"time"
 
@@ -9,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(storage *storage.PostgresStorage, logger *slog.Logger) *gin.Engine {
+func NewRouter(storage *storage.PostgresStorage, logger *slog.Logger, jwtService *auth.JWTService) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
@@ -22,6 +24,21 @@ func NewRouter(storage *storage.PostgresStorage, logger *slog.Logger) *gin.Engin
 	}))
 
 	router.Use(gin.Recovery())
+
+	handler := handlers.NewHandler(storage, logger, jwtService)
+
+	authGroup := router.Group("/auth")
+	{
+		authGroup.POST("/register", handler.RegisterUserHandler)
+		authGroup.POST("/login", handler.LoginHandler)
+		authGroup.POST("/logout", handler.LogoutHandler)
+	}
+
+	api := router.Group("/api")
+	api.Use(handler.AuthMiddleware())
+	{
+		api.GET("/orders/:id", handler.GetOrderByIDHandler)
+	}
 
 	return router
 }
