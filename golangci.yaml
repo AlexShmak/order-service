@@ -1,0 +1,9 @@
+linters:
+  enable:
+    - govet
+    - goling
+    - errcheck
+formatters:
+  enable:
+    - gofmt
+    - goimports
