@@ -59,6 +59,12 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 func (h *Handler) RegisterUserHandler(c *gin.Context) {
 	// Implementation for user registration
 }
+func (h *Handler) DeleteUserHandler(c *gin.Context) {
+	// Implementation for user deletion
+}
+func (h *Handler) GetUserByIDHandler(c *gin.Context) {
+	// Implementation for getting user by ID
+}
 func (h *Handler) LoginHandler(c *gin.Context) {
 	// Implementation for user login
 }

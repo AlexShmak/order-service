@@ -1,1 +1,1 @@
-drop table orders_service.users;
+drop table if exists orders_service.users;

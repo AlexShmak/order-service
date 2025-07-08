@@ -1,4 +1,4 @@
-create table orders_service.users
+create table if not exists orders_service.users
 (
     id            bigserial PRIMARY KEY,
     name          varchar(255) not null,

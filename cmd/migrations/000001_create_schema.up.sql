@@ -1,1 +1,1 @@
-create schema orders_service;
+create schema if not exists orders_service;
