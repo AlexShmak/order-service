@@ -1,31 +1,29 @@
 package storage
 
 import (
+	"context"
 	"database/sql"
-
-	"github.com/AlexShmak/wb_test_task_l0/internal/models"
 )
 
 type PostgresStorage struct {
 	Users interface {
-		Create(user *models.User) error
-		Delete(user *models.User) error
-		GetByID(id int64) (*models.User, error)
+		Create(context.Context, *User) error
+		GetByEmail(context.Context, string) (*User, error)
 	}
-	OrdersAdmin interface {
-		Create(order *models.Order) error
-		DeleteByID(id int64) error
-		GetByID(id int64) (*models.Order, error)
+	Orders interface {
+		GetByID(context.Context, int64) (*Order, error)
 	}
-	OrdersRegular interface {
-		GetByID(id int64) (*models.Order, error)
+	Tokens interface {
+		Create(context.Context, *RefreshToken) error
+		Delete(context.Context, string) error
+		GetByToken(context.Context, string) (*RefreshToken, error)
 	}
 }
 
-func NewPostgresStorage(adminDB *sql.DB, regularDB *sql.DB) *PostgresStorage {
+func NewPostgresStorage(db *sql.DB) *PostgresStorage {
 	return &PostgresStorage{
-		Users:         &UsersRepository{db: adminDB},
-		OrdersAdmin:   &OrdersRepositoryAdmin{db: adminDB},
-		OrdersRegular: &OrdersRepositoryRegular{db: regularDB},
+		Users:  &UsersRepository{db: db},
+		Orders: &OrdersRepository{db: db},
+		Tokens: &TokensRepository{db: db},
 	}
 }

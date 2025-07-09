@@ -2,27 +2,11 @@ package handlers
 
 import (
 	"errors"
-	"github.com/AlexShmak/wb_test_task_l0/internal/auth"
-	"github.com/AlexShmak/wb_test_task_l0/internal/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"log/slog"
 	"net/http"
 )
-
-type Handler struct {
-	Storage    *storage.PostgresStorage
-	Logger     *slog.Logger
-	JWTService *auth.JWTService
-}
-
-func NewHandler(s *storage.PostgresStorage, l *slog.Logger, jwt *auth.JWTService) *Handler {
-	return &Handler{
-		Storage:    s,
-		Logger:     l,
-		JWTService: jwt,
-	}
-}
 
 func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -54,23 +38,4 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 		c.Set("userId", userId)
 		c.Next()
 	}
-}
-
-func (h *Handler) RegisterUserHandler(c *gin.Context) {
-	// Implementation for user registration
-}
-func (h *Handler) DeleteUserHandler(c *gin.Context) {
-	// Implementation for user deletion
-}
-func (h *Handler) GetUserByIDHandler(c *gin.Context) {
-	// Implementation for getting user by ID
-}
-func (h *Handler) LoginHandler(c *gin.Context) {
-	// Implementation for user login
-}
-func (h *Handler) LogoutHandler(c *gin.Context) {
-	// Implementation for user logout
-}
-func (h *Handler) GetOrderByIDHandler(c *gin.Context) {
-	// Implementation for getting order by ID
 }

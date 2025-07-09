@@ -16,15 +16,6 @@ func NewJWTService(accessSecret string, refreshSecret string) *JWTService {
 	return &JWTService{accessSecret: accessSecret, refreshSecret: refreshSecret}
 }
 
-type TokenDetails struct {
-	AccessToken  string
-	RefreshToken string
-	AccessUuid   string
-	RefreshUuid  string
-	ATExpires    int64
-	RTExpires    int64
-}
-
 func (s *JWTService) GenerateTokens(userId int64) (string, string, error) {
 	accessToken, err := s.createAccessToken(userId)
 	if err != nil {
@@ -63,8 +54,8 @@ func (s *JWTService) createAccessToken(userId int64) (string, error) {
 		"sub": fmt.Sprintf("%d", userId),
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(time.Minute * 15).Unix(),
-		"iss": "todo-app-go",
-		"aud": "todo-app-go-users",
+		"iss": "orders-service",
+		"aud": "orders-service-users",
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

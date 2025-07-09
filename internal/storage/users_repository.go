@@ -1,40 +1,70 @@
 package storage
 
 import (
+	"context"
 	"database/sql"
-	"errors"
-	"github.com/AlexShmak/wb_test_task_l0/internal/models"
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
+
+type User struct {
+	ID           int64     `json:"id"`
+	Username     string    `json:"username"`
+	Password     string    `json:""`
+	Email        string    `json:"email"`
+	CreatedAt    time.Time `json:"created_at"`
+	passwordHash []byte
+}
+
+func (u *User) hashPassword() error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	u.passwordHash = hash
+
+	return nil
+}
+
+func (u *User) CheckPasswordHash(password string) bool {
+	err := bcrypt.CompareHashAndPassword(u.passwordHash, []byte(password))
+	return err == nil
+}
 
 type UsersRepository struct {
 	db *sql.DB
 }
 
-func (r *UsersRepository) Create(user *models.User) error {
-	query := `INSERT INTO orders_service.users (id, name, email, password) VALUES ($1, $2, $3, $4)`
-	if _, err := r.db.Exec(query, user.ID, user.Name, user.Email, user.PasswordHash); err != nil {
+func (s *UsersRepository) Create(ctx context.Context, user *User) error {
+
+	if err := user.hashPassword(); err != nil {
 		return err
 	}
-	return nil
-}
 
-func (r *UsersRepository) Delete(user *models.User) error {
-	query := `DELETE FROM orders_service.users WHERE id = $1`
-	if _, err := r.db.Exec(query, user.ID); err != nil {
-		return err
-	}
-	return nil
-}
+	query := `
+		INSERT INTO orders_service.users (username, password, email)
+		VALUES ($1, $2, $3) RETURNING id, created_at
+	`
 
-func (r *UsersRepository) GetByID(id int64) (*models.User, error) {
-	var user models.User
-	query := `SELECT id, name, email, password FROM orders_service.users WHERE id = $1`
-	err := r.db.QueryRow(query, id).Scan(&user.ID, &user.Name, &user.Email, &user.PasswordHash)
+	err := s.db.QueryRowContext(ctx, query, user.Username, user.passwordHash, user.Email).Scan(&user.ID, &user.CreatedAt)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
+		return err
+	}
+	return nil
+}
+
+func (s *UsersRepository) GetByEmail(ctx context.Context, email string) (*User, error) {
+	query := `
+		SELECT * FROM orders_service.users
+		WHERE email = $1
+	`
+	user := &User{}
+	var passwordHash []byte
+	if err := s.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Username, &passwordHash, &user.Email, &user.CreatedAt); err != nil {
 		return nil, err
 	}
-	return &user, nil
+	user.passwordHash = passwordHash
+	return user, nil
 }

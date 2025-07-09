@@ -29,7 +29,7 @@ func NewRouter(storage *storage.PostgresStorage, logger *slog.Logger, jwtService
 
 	authGroup := router.Group("/auth")
 	{
-		authGroup.POST("/register", handler.RegisterUserHandler)
+		authGroup.POST("/register", handler.RegisterHandler)
 		authGroup.POST("/login", handler.LoginHandler)
 		authGroup.POST("/logout", handler.LogoutHandler)
 	}

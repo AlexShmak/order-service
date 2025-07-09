@@ -27,7 +27,7 @@ func main() {
 	slogLogger := logger.SetupLogger(cfg.Environment)
 
 	// connect to database
-	regularDB, adminDB, err := db.Connect(cfg)
+	regularDB, err := db.Connect(cfg)
 	if err != nil {
 		log.Panic("Could not connect to database.")
 	}
@@ -45,7 +45,7 @@ func main() {
 		log.Panicf("Could not apply migrations: %s", err)
 	}
 	slogLogger.Info("Migrations applied successfully.")
-	postgresStorage := storage.NewPostgresStorage(regularDB, adminDB)
+	postgresStorage := storage.NewPostgresStorage(regularDB)
 
 	// setup router
 	jwtService := auth.NewJWTService(cfg.JWT.AccessSecret, cfg.JWT.RefreshSecret)
