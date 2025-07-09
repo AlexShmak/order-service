@@ -7,6 +7,7 @@ import (
 )
 
 func (h *Handler) GetOrderByIDHandler(c *gin.Context) {
+
 	orderID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		h.Logger.Error("invalid order ID", "error", err.Error())

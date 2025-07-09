@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -40,7 +41,7 @@ func (s *TokensRepository) GetByToken(ctx context.Context, tokenString string) (
 		SELECT * FROM orders_service.refresh_tokens WHERE token = $1 AND expires_at > NOW()
 	`
 	if err := s.db.QueryRowContext(ctx, query, tokenString).Scan(&token.ID, &token.UserID, &token.Token, &token.ExpiresAt, &token.CreatedAt); err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("refresh token not found or expired")
 		}
 		return nil, fmt.Errorf("could not get refresh token by token string: %w", err)
