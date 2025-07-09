@@ -19,10 +19,6 @@ type TokensRepository struct {
 	db *sql.DB
 }
 
-func NewTokensRepository(db *sql.DB) *TokensRepository {
-	return &TokensRepository{db: db}
-}
-
 func (s *TokensRepository) Create(ctx context.Context, token *RefreshToken) error {
 	query := `
 		INSERT INTO orders_service.refresh_tokens (user_id, token, expires_at) 

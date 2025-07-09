@@ -12,6 +12,7 @@ type PostgresStorage struct {
 	}
 	Orders interface {
 		GetByID(context.Context, int64) (*Order, error)
+		Create(ctx context.Context, order *Order) error
 	}
 	Tokens interface {
 		Create(context.Context, *RefreshToken) error

@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS orders_service.refresh_tokens;
