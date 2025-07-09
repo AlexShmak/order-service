@@ -44,8 +44,8 @@ create table if not exists orders_service.orders
     date_created       timestamptz  not null default now(),
     oof_shard          varchar(255) not null,
 
-    foreign key (delivery_data_id) references orders_service.deliveries (id) on delete cascade,
-    foreign key (payment_data_id) references orders_service.payments (id) on delete cascade
+    foreign key (delivery_data_id) references orders_service.deliveries (id),
+    foreign key (payment_data_id) references orders_service.payments (id)
 );
 
 create table if not exists orders_service.items

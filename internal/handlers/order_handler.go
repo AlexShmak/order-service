@@ -32,8 +32,8 @@ func (h *Handler) GetOrderByIDHandler(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, order)
 }
 
-func (h *Handler) CreateOrder(c *gin.Context) {
-	userID, exists := c.Get("userID")
+func (h *Handler) CreateOrderHandler(c *gin.Context) {
+	userId, exists := c.Get("userId")
 	if !exists {
 		h.Logger.Error("Unauthorized access attempt to create order")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
@@ -56,7 +56,7 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 			Bank         string `json:"bank" binding:"required"`
 			DeliveryCost int    `json:"delivery_cost" binding:"required"`
 			GoodsTotal   int    `json:"goods_total" binding:"required"`
-			CustomFee    int    `json:"custom_fee" binding:"required"`
+			CustomFee    int    `json:"custom_fee" binding:"gte=0"`
 		} `json:"payment" binding:"required"`
 		Items []struct {
 			ChrtID     int    `json:"chrt_id" binding:"required"`
@@ -67,7 +67,7 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 			Brand      string `json:"brand" binding:"required"`
 			TotalPrice int    `json:"total_price" binding:"required"`
 			NmID       int    `json:"nm_id" binding:"required"`
-		} `json:"items" binding:"required,dive,min=1"`
+		} `json:"items" binding:"required,gt=0,dive"`
 		Locale          string `json:"locale" binding:"required"`
 		DeliveryService string `json:"delivery_service" binding:"required"`
 	}
@@ -131,7 +131,7 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 		Items:             items,
 		Locale:            orderRequest.Locale,
 		InternalSignature: "",
-		CustomerID:        userID.(string),
+		CustomerID:        strconv.FormatInt(userId.(int64), 10),
 		DeliveryService:   orderRequest.DeliveryService,
 		ShardKey:          "9",
 		SmID:              99,

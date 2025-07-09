@@ -9,7 +9,7 @@ import (
 )
 
 func Connect(config *config.Config) (*sql.DB, error) {
-	db, err := sql.Open("postgres", config.GetRegularPostgresDSN())
+	db, err := sql.Open("postgres", config.GetPostgresDSN())
 	if err != nil {
 		return nil, err
 	}

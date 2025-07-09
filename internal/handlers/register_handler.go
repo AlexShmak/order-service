@@ -23,5 +23,5 @@ func (h *Handler) RegisterHandler(c *gin.Context) {
 	}
 
 	h.Logger.Info("user created", slog.Int64("id", user.ID))
-	c.IndentedJSON(http.StatusCreated, gin.H{"id": user.ID, "username": user.Username, "email": user.Email, "created_at": user.CreatedAt})
+	c.IndentedJSON(http.StatusCreated, gin.H{"id": user.ID, "name": user.Name, "email": user.Email, "created_at": user.CreatedAt})
 }

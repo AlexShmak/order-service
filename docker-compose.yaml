@@ -19,5 +19,24 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      dockerfile: Dockerfile
+    container_name: orders_service_backend
+    image: orders_service_backend:latest
+    restart: always
+    ports:
+      - "${SERVER_PORT}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - orders_network
+
 volumes:
   postgres_data:
+
+networks:
+  orders_network:
+    driver: bridge
+

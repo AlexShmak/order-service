@@ -36,13 +36,13 @@ func main() {
 	slogLogger.Info("Running database migrations...")
 	m, err := migrate.New(
 		"file://cmd/migrations",
-		cfg.GetAdminPostgresDSN(),
+		cfg.Database.URL,
 	)
 	if err != nil {
-		log.Panicf("Could not create migration instance: %s", err)
+		log.Fatalf("Could not create migration instance: %v", err)
 	}
 	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		log.Panicf("Could not apply migrations: %s", err)
+		log.Fatalf("Could not apply migrations: %v", err)
 	}
 	slogLogger.Info("Migrations applied successfully.")
 	postgresStorage := storage.NewPostgresStorage(regularDB)
@@ -50,8 +50,8 @@ func main() {
 	// setup router
 	jwtService := auth.NewJWTService(cfg.JWT.AccessSecret, cfg.JWT.RefreshSecret)
 	r := router.NewRouter(postgresStorage, slogLogger, jwtService)
-	if err := r.Run(cfg.Server.Host + cfg.Server.Port); err != nil {
-		log.Panicf("Error starting r: %s", err)
+	if err := r.Run(cfg.Server.Host + ":" + cfg.Server.Port); err != nil {
+		log.Fatalf("Error starting r: %v", err)
 	}
 
 	slogLogger.Info("Router started.", slog.String("env", cfg.Environment))

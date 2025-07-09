@@ -47,7 +47,7 @@ func (s *TokensRepository) GetByToken(ctx context.Context, tokenString string) (
 
 func (s *TokensRepository) Delete(ctx context.Context, tokenString string) error {
 	query := `
-		DELETE FROM refresh_tokens WHERE token = $1
+		DELETE FROM orders_service.refresh_tokens WHERE token = $1
 	`
 	if _, err := s.db.ExecContext(ctx, query, tokenString); err != nil {
 		return fmt.Errorf("could not delete refresh token: %w", err)

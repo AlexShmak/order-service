@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
 	"slices"
 	"time"
 
@@ -9,9 +10,9 @@ import (
 )
 
 type Config struct {
-	Environment string         `env:"ENV" env-default:"local"`
-	Database    DatabaseConfig `env-prefix:"DB_"`
-	Server      ServerConfig   `env-prefix:"SERVER_"`
+	Environment string `env:"ENV" env-default:"local"`
+	Database    DatabaseConfig
+	Server      ServerConfig
 	JWT         JWT
 }
 
@@ -21,30 +22,34 @@ type JWT struct {
 }
 
 type DatabaseConfig struct {
-	Host            string        `env:"HOST" env-default:"localhost"`
-	Port            string        `env:"PORT" env-default:"5432"`
-	DBName          string        `env:"DBNAME" env-required:"true"`
-	AdminUser       string        `env:"ADMIN_USER" env-required:"true"`
-	AdminPassword   string        `env:"ADMIN_PASSWORD" env-required:"true"`
-	RegularUser     string        `env:"REGULAR_USER" env-required:"true"`
-	RegularPassword string        `env:"REGULAR_PASSWORD" env-required:"true"`
+	Host            string        `env:"DB_HOST" env-default:"localhost"`
+	Port            string        `env:"DB_PORT" env-default:"5432"`
+	User            string        `env:"DB_USER" env-required:"true"`
+	Password        string        `env:"DB_PASSWORD" env-required:"true"`
+	DBName          string        `env:"DB_NAME" env-required:"true"`
 	SSLMode         string        `env:"SSL_MODE" env-default:"disable"`
 	MaxOpenConns    int           `env:"MAX_OPEN_CONNS" env-default:"25"`
 	MaxIdleConns    int           `env:"MAX_IDLE_CONNS" env-default:"25"`
 	ConnMaxLifetime time.Duration `env:"CONN_MAX_LIFETIME" env-default:"5m"`
 	ConnMaxIdleTime time.Duration `env:"CONN_MAX_IDLE_TIME" env-default:"1m"`
+	URL             string        `env:"PGSQL_URL" env-required:"true"`
 }
 
 type ServerConfig struct {
-	Port         string        `env:"PORT" env-default:"8080"`
-	Host         string        `env:"HOST" env-default:"localhost"`
+	Port         string        `env:"SERVER_PORT" env-default:"8080"`
+	Host         string        `env:"SERVER_HOST" env-default:"localhost"`
 	ReadTimeout  time.Duration `env:"READ_TIMEOUT" env-default:"30s"`
 	WriteTimeout time.Duration `env:"WRITE_TIMEOUT" env-default:"30s"`
 }
 
 func LoadConfig() (*Config, error) {
 	var cfg Config
-	if err := cleanenv.ReadConfig(".env", &cfg); err != nil {
+
+	if err := godotenv.Load(); err != nil {
+		return nil, fmt.Errorf("error loading .env file: %w", err)
+	}
+
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
 		return nil, fmt.Errorf("failed to read config: %w", err)
 	}
 
@@ -79,23 +84,12 @@ func (c *Config) validate() error {
 	return nil
 }
 
-func (c *Config) GetAdminPostgresDSN() string {
+func (c *Config) GetPostgresDSN() string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		c.Database.Host,
 		c.Database.Port,
-		c.Database.AdminUser,
-		c.Database.AdminPassword,
-		c.Database.DBName,
-		c.Database.SSLMode,
-	)
-}
-
-func (c *Config) GetRegularPostgresDSN() string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		c.Database.Host,
-		c.Database.Port,
-		c.Database.RegularUser,
-		c.Database.RegularPassword,
+		c.Database.User,
+		c.Database.Password,
 		c.Database.DBName,
 		c.Database.SSLMode,
 	)

@@ -38,6 +38,7 @@ func NewRouter(storage *storage.PostgresStorage, logger *slog.Logger, jwtService
 	api.Use(handler.AuthMiddleware())
 	{
 		api.GET("/orders/:id", handler.GetOrderByIDHandler)
+		api.POST("/orders", handler.CreateOrderHandler)
 	}
 
 	return router
