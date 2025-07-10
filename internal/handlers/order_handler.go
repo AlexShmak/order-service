@@ -10,6 +10,12 @@ import (
 )
 
 func (h *Handler) GetOrderByIDHandler(c *gin.Context) {
+	userId, exists := c.Get("userId")
+	if !exists {
+		h.Logger.Error("Unauthorized access attempt to create order")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 
 	orderID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -18,7 +24,7 @@ func (h *Handler) GetOrderByIDHandler(c *gin.Context) {
 		return
 	}
 
-	order, err := h.Storage.Orders.GetByID(c.Request.Context(), orderID)
+	order, err := h.Storage.Orders.GetByID(c.Request.Context(), orderID, userId.(int64))
 	if err != nil {
 		h.Logger.Error("failed to get order", "error", err.Error())
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "failed to get order"})

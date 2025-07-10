@@ -11,7 +11,7 @@ type PostgresStorage struct {
 		GetByEmail(context.Context, string) (*User, error)
 	}
 	Orders interface {
-		GetByID(context.Context, int64) (*Order, error)
+		GetByID(context.Context, int64, int64) (*Order, error)
 		Create(ctx context.Context, order *Order) error
 	}
 	Tokens interface {

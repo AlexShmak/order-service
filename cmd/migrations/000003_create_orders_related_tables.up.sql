@@ -24,7 +24,6 @@ create table if not exists orders_service.payments
     delivery_cost int          not null,
     goods_total   int          not null,
     custom_fee    int          not null,
-    created_at    timestamptz  not null default now()
 );
 
 create table if not exists orders_service.orders
@@ -62,8 +61,8 @@ create table if not exists orders_service.items
     nm_id        int          not null,
     brand        varchar(255) not null,
     status       int          not null,
-    created_at   timestamptz  not null default now(),
     order_id     bigint       not null,
+    created_at   timestamptz  not null default now(),
 
     foreign key (order_id) references orders_service.orders (id) on delete cascade
 );

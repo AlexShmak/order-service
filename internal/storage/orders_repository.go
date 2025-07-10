@@ -23,8 +23,6 @@ type Order struct {
 	SmID              int64
 	DateCreated       time.Time
 	OofShard          string
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
 }
 
 type Delivery struct {
@@ -68,7 +66,7 @@ type OrdersRepository struct {
 	db *sql.DB
 }
 
-func (r *OrdersRepository) GetByID(ctx context.Context, id int64) (*Order, error) {
+func (r *OrdersRepository) GetByID(ctx context.Context, id int64, user_id int64) (*Order, error) {
 	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
 	if err != nil {
 		return nil, err
@@ -96,9 +94,9 @@ func (r *OrdersRepository) GetByID(ctx context.Context, id int64) (*Order, error
         FROM orders_service.orders o
         JOIN orders_service.deliveries d ON o.delivery_data_id = d.id
         JOIN orders_service.payments p ON o.payment_data_id = p.id
-        WHERE o.id = $1`
+        WHERE o.id = $1 AND o.customer_id = $2`
 
-	err = tx.QueryRowContext(ctx, orderQuery, id).Scan(
+	err = tx.QueryRowContext(ctx, orderQuery, id, user_id).Scan(
 		&order.OrderUID, &order.TrackNumber, &order.Entry, &order.Locale, &order.InternalSignature,
 		&order.CustomerID, &order.DeliveryService, &order.ShardKey, &order.SmID, &order.DateCreated, &order.OofShard,
 		&delivery.Name, &delivery.Phone, &delivery.Zip, &delivery.City, &delivery.Address, &delivery.Region, &delivery.Email,
