@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export function Login() {
 	const [email, setEmail] = useState("");
@@ -58,6 +58,9 @@ export function Login() {
 			<button type="submit" disabled={loading}>
 				{loading ? "Вход..." : "Войти"}
 			</button>
+			<Link to="/" style={{ marginLeft: "10px" }}>
+				Нет аккаунта? Зарегистрироваться
+			</Link>
 			{error && <p style={{ color: "red" }}>{error}</p>}
 		</form>
 	);

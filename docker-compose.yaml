@@ -1,53 +1,53 @@
 services:
-    postgres:
-        image: postgres:latest
-        container_name: order_service_db
-        restart: always
-        environment:
-            POSTGRES_DB: ${DB_NAME}
-            POSTGRES_USER: ${DB_USER}
-            POSTGRES_PASSWORD: ${DB_PASSWORD}
-        volumes:
-            - postgres_data:/var/lib/postgresql/data
-        ports:
-            - "${DB_PORT}:5432"
-        networks:
-            - orders_network
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
+  postgres:
+    image: postgres:latest
+    container_name: order_service_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:5432"
+    networks:
+      - orders_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-    backend:
-        build:
-            dockerfile: Dockerfile
-        container_name: orders_service_backend
-        image: orders_service_backend:latest
-        restart: always
-        ports:
-            - "${SERVER_PORT}:8080"
-        depends_on:
-            postgres:
-                condition: service_healthy
-        networks:
-            - orders_network
+  backend:
+    build:
+      dockerfile: Dockerfile
+    container_name: orders_service_backend
+    image: orders_service_backend:latest
+    restart: always
+    ports:
+      - "${SERVER_PORT}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - orders_network
 
-    frontend:
-        build:
-            context: ./frontend
-            dockerfile: Dockerfile
-        container_name: orders_service_frontend
-        ports:
-            - "8081:80"
-        networks:
-            - orders_network
-        depends_on:
-            - backend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: orders_service_frontend
+    ports:
+      - "${FRONTEND_PORT}:80"
+    networks:
+      - orders_network
+    depends_on:
+      - backend
 
 volumes:
-    postgres_data:
+  postgres_data:
 
 networks:
-    orders_network:
-        driver: bridge
+  orders_network:
+    driver: bridge

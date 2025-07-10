@@ -15,7 +15,7 @@ create table if not exists orders_service.payments
 (
     id            bigserial PRIMARY KEY,
     transaction   varchar(255) not null,
-    request_id    varchar(255), -- Can be empty
+    request_id    varchar(255),
     currency      varchar(255) not null,
     provider      varchar(255) not null,
     amount        int          not null,
@@ -23,7 +23,7 @@ create table if not exists orders_service.payments
     bank          varchar(255) not null,
     delivery_cost int          not null,
     goods_total   int          not null,
-    custom_fee    int          not null,
+    custom_fee    int          not null
 );
 
 create table if not exists orders_service.orders
