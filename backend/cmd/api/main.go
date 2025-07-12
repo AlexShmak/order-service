@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/AlexShmak/wb_test_task_l0/cmd/worker"
 	"github.com/AlexShmak/wb_test_task_l0/internal/auth"
 	"log"
 	"log/slog"
@@ -47,12 +48,15 @@ func main() {
 	slogLogger.Info("Migrations applied successfully.")
 	postgresStorage := storage.NewPostgresStorage(regularDB)
 
+	go worker.StartWorker(cfg)
+
 	// setup router
 	jwtService := auth.NewJWTService(cfg.JWT.AccessSecret, cfg.JWT.RefreshSecret)
-	r := router.NewRouter(postgresStorage, slogLogger, jwtService)
+	r := router.NewRouter(postgresStorage, slogLogger, jwtService, cfg)
 	if err := r.Run(cfg.Server.Host + ":" + cfg.Server.Port); err != nil {
 		log.Fatalf("Error starting r: %v", err)
 	}
 
 	slogLogger.Info("Router started.", slog.String("env", cfg.Environment))
+
 }

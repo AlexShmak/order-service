@@ -42,38 +42,41 @@ export function Register() {
     };
 
     return (
-        <form id="register-form" onSubmit={handleRegister}>
-            <input
-                type="text"
-                id="username"
-                placeholder="Имя"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-            />
-            <input
-                type="email"
-                id="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-            />
-            <input
-                type="password"
-                id="password"
-                placeholder="Пароль"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-            />
-            <button type="submit" disabled={loading}>
-                {loading ? "Регистрация..." : "Зарегистрироваться"}
-            </button>
-            <Link to="/login" style={{marginLeft: "10px"}}>
-                Уже есть аккаунт? Войти
-            </Link>
-            {error && <p style={{color: "red"}}>{error}</p>}
-        </form>
+        <div className="register-page">
+            <h1>Регистрация</h1>
+            <form id="register-form" onSubmit={handleRegister}>
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Имя"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                />
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Пароль"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+                <button type="submit" disabled={loading}>
+                    {loading ? "Регистрация..." : "Зарегистрироваться"}
+                </button>
+                <Link to="/login" style={{marginLeft: "10px"}}>
+                    Уже есть аккаунт? Войти
+                </Link>
+                {error && <p style={{color: "red"}}>{error}</p>}
+            </form>
+        </div>
     );
 }

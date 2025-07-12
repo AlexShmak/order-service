@@ -63,7 +63,7 @@ export function Order() {
                 {error && (
                     <div>
                         <h2>Упс...</h2>
-                        <p>{error}</p>
+                        <p>Заказ с таким ID не найден</p>
                     </div>
                 )}
                 {orderDetails && (

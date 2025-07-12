@@ -14,6 +14,12 @@ type Config struct {
 	Database    DatabaseConfig
 	Server      ServerConfig
 	JWT         JWT
+	Kafka       KafkaConfig
+}
+
+type KafkaConfig struct {
+	Brokers []string `env:"KAFKA_BROKERS" env-required:"true"`
+	Topic   string   `env:"KAFKA_TOPIC" env-required:"true"`
 }
 
 type JWT struct {
