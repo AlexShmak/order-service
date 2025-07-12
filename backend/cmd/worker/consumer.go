@@ -66,7 +66,6 @@ func StartWorker(cfg *config.Config, pgStorage *storage.PostgresStorage, logger 
 	consumerConfig := sarama.NewConfig()
 	consumerConfig.Consumer.Return.Errors = true
 	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
-	consumerConfig.Version = sarama.V2_8_1_0 // Specify a specific Kafka version
 
 	consumerGroup, err := sarama.NewConsumerGroup(cfg.Kafka.Brokers, "orders-group", consumerConfig)
 	if err != nil {

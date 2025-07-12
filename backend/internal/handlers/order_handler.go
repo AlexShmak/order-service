@@ -18,23 +18,38 @@ func (h *Handler) GetOrderByIDHandler(c *gin.Context) {
 		return
 	}
 
-	orderID, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		h.Logger.Error("invalid order ID", "error", err.Error())
+	orderUID := c.Param("id")
+	if orderUID == "" {
+		h.Logger.Error("invalid order ID", "error", "empty order ID")
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid order ID"})
 		return
 	}
 
-	order, err := h.Storage.Orders.GetByID(c.Request.Context(), orderID, userId.(int64))
+	// Check if order exists in cache
+	order, err := h.Cache.Orders.Get(c.Request.Context(), orderUID)
+	if err == nil {
+		if order != nil {
+			h.Logger.Info("order found in cache", "id", orderUID)
+			c.IndentedJSON(http.StatusOK, order)
+			return
+		}
+		h.Logger.Info("order not found in cache", "id", orderUID)
+	}
+
+	order, err = h.Storage.Orders.GetByID(c.Request.Context(), orderUID, userId.(int64))
 	if err != nil {
 		h.Logger.Error("failed to get order", "error", err.Error())
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "failed to get order"})
 		return
 	}
 	if order == nil {
-		h.Logger.Error("order not found", "id", orderID)
+		h.Logger.Error("order not found", "id", orderUID)
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "order not found"})
 		return
+	}
+	// Store order in cache
+	if err = h.Cache.Orders.Set(c.Request.Context(), order); err != nil {
+		h.Logger.Error("failed to set order in cache", "error", err.Error())
 	}
 	c.IndentedJSON(http.StatusOK, order)
 }

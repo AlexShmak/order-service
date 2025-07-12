@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/AlexShmak/wb_test_task_l0/internal/config"
 	"github.com/AlexShmak/wb_test_task_l0/internal/kafka"
+	"github.com/AlexShmak/wb_test_task_l0/internal/storage/cache"
 	"log/slog"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(storage *storage.PostgresStorage, logger *slog.Logger, jwtService *auth.JWTService, cfg *config.Config, producer *kafka.Producer) *gin.Engine {
+func NewRouter(storage *storage.PostgresStorage, logger *slog.Logger, jwtService *auth.JWTService, cfg *config.Config, producer *kafka.Producer, redisCache *cache.RedisStorage) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
@@ -28,7 +29,7 @@ func NewRouter(storage *storage.PostgresStorage, logger *slog.Logger, jwtService
 
 	router.Use(gin.Recovery())
 
-	handler := handlers.NewHandler(storage, logger, jwtService, cfg, producer)
+	handler := handlers.NewHandler(storage, logger, jwtService, cfg, producer, redisCache)
 
 	authGroup := router.Group("/auth")
 	{

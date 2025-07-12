@@ -15,6 +15,13 @@ type Config struct {
 	Server      ServerConfig
 	JWT         JWT
 	Kafka       KafkaConfig
+	Redis       RedisConfig
+}
+
+type RedisConfig struct {
+	Addr     string `env:"REDIS_ADDR" env-default:"localhost:6379"`
+	Password string `env:"REDIS_PASSWORD" env-required:"true"`
+	DB       int    `env:"REDIS_DB" env-default:"0"`
 }
 
 type KafkaConfig struct {

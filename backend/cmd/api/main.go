@@ -5,6 +5,7 @@ import (
 	"github.com/AlexShmak/wb_test_task_l0/cmd/worker"
 	"github.com/AlexShmak/wb_test_task_l0/internal/auth"
 	"github.com/AlexShmak/wb_test_task_l0/internal/kafka"
+	"github.com/AlexShmak/wb_test_task_l0/internal/storage/cache"
 	"log/slog"
 	"os"
 
@@ -53,6 +54,11 @@ func main() {
 	slogLogger.Info("Migrations applied successfully.")
 	postgresStorage := storage.NewPostgresStorage(regularDB)
 
+	// redisCache setup
+	redisClient := cache.NewRedisClient(cfg.Redis.Addr, cfg.Redis.Password, cfg.Redis.DB)
+	redisCache := cache.NewRedisStorage(redisClient)
+
+	// start worker
 	go worker.StartWorker(cfg, postgresStorage, slogLogger)
 
 	// setup kafka producer
@@ -69,7 +75,7 @@ func main() {
 
 	// setup router
 	jwtService := auth.NewJWTService(cfg.JWT.AccessSecret, cfg.JWT.RefreshSecret)
-	r := router.NewRouter(postgresStorage, slogLogger, jwtService, cfg, kafkaProducer)
+	r := router.NewRouter(postgresStorage, slogLogger, jwtService, cfg, kafkaProducer, redisCache)
 	if err := r.Run(cfg.Server.Host + ":" + cfg.Server.Port); err != nil {
 		slogLogger.Error("Error starting r", "error", err)
 		os.Exit(1)

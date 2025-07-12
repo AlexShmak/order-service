@@ -33,6 +33,8 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - orders_network
 
@@ -66,7 +68,7 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 1
     ports:
-      - "9092:9092"
+      - "${KAFKA_PORT}:9092"
     healthcheck:
       test:
         [
@@ -78,8 +80,26 @@ services:
       retries: 5
     networks:
       - orders_network
+
+  redis:
+    image: redis:latest
+    container_name: orders_service_redis
+    restart: always
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - orders_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   orders_network:

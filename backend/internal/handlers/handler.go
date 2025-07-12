@@ -5,6 +5,7 @@ import (
 	"github.com/AlexShmak/wb_test_task_l0/internal/config"
 	"github.com/AlexShmak/wb_test_task_l0/internal/kafka"
 	"github.com/AlexShmak/wb_test_task_l0/internal/storage"
+	"github.com/AlexShmak/wb_test_task_l0/internal/storage/cache"
 	"log/slog"
 )
 
@@ -14,6 +15,7 @@ type Handler struct {
 	Logger        *slog.Logger
 	JWTService    *auth.JWTService
 	KafkaProducer *kafka.Producer
+	Cache         *cache.RedisStorage
 }
 
 func NewHandler(
@@ -22,6 +24,7 @@ func NewHandler(
 	jwtService *auth.JWTService,
 	cfg *config.Config,
 	producer *kafka.Producer,
+	redisCache *cache.RedisStorage,
 ) *Handler {
 	return &Handler{
 		Config:        cfg,
@@ -29,5 +32,6 @@ func NewHandler(
 		Logger:        logger,
 		JWTService:    jwtService,
 		KafkaProducer: producer,
+		Cache:         redisCache,
 	}
 }
