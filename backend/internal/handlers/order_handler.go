@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/AlexShmak/wb_test_task_l0/internal/kafka"
 	"github.com/AlexShmak/wb_test_task_l0/internal/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -147,12 +146,6 @@ func (h *Handler) CreateOrderHandler(c *gin.Context) {
 		OofShard:          "1",
 	}
 
-	//if err := h.Storage.Orders.Create(c.Request.Context(), order); err != nil {
-	//	h.Logger.Error("failed to create order", "error", err)
-	//	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create order"})
-	//	return
-	//}
-
 	orderInBytes, err := json.Marshal(order)
 	if err != nil {
 		h.Logger.Error("failed to marshal order", "error", err.Error())
@@ -161,14 +154,14 @@ func (h *Handler) CreateOrderHandler(c *gin.Context) {
 	}
 
 	// Send encoded order to kafka
-	err = kafka.PushOrderToQueue(h.Config.Kafka.Topic, orderInBytes, h.Config)
+	err = h.KafkaProducer.PushOrderToQueue(h.Config.Kafka.Topic, orderInBytes)
 	if err != nil {
 		h.Logger.Error("failed to push order to kafka", "error", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create order"})
 		return
 	}
 
-	h.Logger.Info("order created successfully", "info", orderUID)
+	h.Logger.Info("order placed in queue successfully", "info", orderUID)
 	c.JSON(http.StatusCreated, gin.H{
 		"message":      "Order placed successfully",
 		"order_uid":    order.OrderUID,

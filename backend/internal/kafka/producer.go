@@ -3,37 +3,47 @@ package kafka
 import (
 	"github.com/AlexShmak/wb_test_task_l0/internal/config"
 	"github.com/IBM/sarama"
-	"log"
+	"log/slog"
 )
 
-func PushOrderToQueue(topic string, message []byte, cfg *config.Config) error {
+type Producer struct {
+	SyncProducer sarama.SyncProducer
+	logger       *slog.Logger
+}
+
+func NewProducer(cfg *config.Config, logger *slog.Logger) (*Producer, error) {
 	producerConfig := sarama.NewConfig()
 	producerConfig.Producer.Return.Successes = true
 	producerConfig.Producer.RequiredAcks = sarama.WaitForAll
 	producerConfig.Producer.Retry.Max = 5
-	producer, err := sarama.NewSyncProducer(cfg.Kafka.Brokers, producerConfig)
 
+	syncProducer, err := sarama.NewSyncProducer(cfg.Kafka.Brokers, producerConfig)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer func(producer sarama.SyncProducer) {
-		err := producer.Close()
-		if err != nil {
-			log.Printf("Failed to close producer: %v", err)
-		} else {
-			log.Println("Producer closed successfully")
-		}
-	}(producer)
 
+	return &Producer{SyncProducer: syncProducer, logger: logger}, nil
+}
+
+func (p *Producer) PushOrderToQueue(topic string, message []byte) error {
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
 		Value: sarama.ByteEncoder(message),
 	}
 
-	partition, offset, err := producer.SendMessage(msg)
+	partition, offset, err := p.SyncProducer.SendMessage(msg)
 	if err != nil {
 		return err
 	}
-	log.Printf("Message sent to partition %d at offset %d\n", partition, offset)
+	p.logger.Info("Message sent", "partition", partition, "offset", offset)
+	return nil
+}
+
+func (p *Producer) Close() error {
+	if err := p.SyncProducer.Close(); err != nil {
+		p.logger.Error("Failed to close producer", "error", err)
+		return err
+	}
+	p.logger.Info("Producer closed successfully")
 	return nil
 }

@@ -74,59 +74,12 @@ func (h *Handler) handleTokenRefresh(c *gin.Context, originalUserID int64) (int6
 	return refreshUserID, true
 }
 
-//func (h *Handler) AuthMiddleware() gin.HandlerFunc {
-//	return func(c *gin.Context) {
-//		tokenString, err := c.Cookie("access_token")
-//		if err != nil {
-//			h.Logger.Error("no access token found in cookies", slog.String("error", err.Error()))
-//			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-//			return
-//		}
-//
-//		token, err := h.JWTService.ValidateAccessToken(tokenString)
-//		if err != nil {
-//			if errors.Is(err, jwt.ErrTokenExpired) {
-//				h.Logger.Info("access token expired, attempting refresh")
-//
-//				userID, err := h.JWTService.GetUserIdFromToken(token)
-//				if err != nil {
-//					h.Logger.Error("could not get user ID from expired token", slog.String("error", err.Error()))
-//					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token claims"})
-//					return
-//				}
-//
-//				if refreshedUserID, ok := h.handleTokenRefresh(c, userID); ok {
-//					c.Set("userId", refreshedUserID)
-//					c.Next()
-//				}
-//				return
-//			}
-//
-//			h.Logger.Error("invalid token", slog.String("error", err.Error()))
-//			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-//			return
-//		}
-//
-//		userId, err := h.JWTService.GetUserIdFromToken(token)
-//		if err != nil {
-//			h.Logger.Error("could not get user ID from token", slog.String("error", err.Error()))
-//			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-//			return
-//		}
-//
-//		c.Set("userId", userId)
-//		c.Next()
-//	}
-//}
-
 func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString, err := c.Cookie("access_token")
 		if err != nil {
-			// Access token is missing, try to refresh using the refresh token.
 			h.Logger.Info("access token not found, attempting refresh with refresh token")
 
-			// We need a user ID to call handleTokenRefresh. We get it from the refresh token itself.
 			refreshTokenString, refreshErr := c.Cookie("refresh_token")
 			if refreshErr != nil {
 				h.Logger.Error("no access or refresh token found in cookies", slog.String("error", refreshErr.Error()))
@@ -134,8 +87,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				return
 			}
 
-			// Parse the refresh token to get the user ID without verifying the signature yet.
-			// The signature and validity will be checked inside handleTokenRefresh.
 			token, _, parseErr := new(jwt.Parser).ParseUnverified(refreshTokenString, jwt.MapClaims{})
 			if parseErr != nil {
 				h.Logger.Error("could not parse refresh token", slog.String("error", parseErr.Error()))
@@ -150,12 +101,11 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 				return
 			}
 
-			// Now attempt the refresh.
 			if refreshedUserID, ok := h.handleTokenRefresh(c, userID); ok {
 				c.Set("userId", refreshedUserID)
 				c.Next()
 			}
-			return // handleTokenRefresh handles aborting on failure.
+			return
 		}
 
 		token, err := h.JWTService.ValidateAccessToken(tokenString)

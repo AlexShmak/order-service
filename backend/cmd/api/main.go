@@ -4,8 +4,9 @@ import (
 	"errors"
 	"github.com/AlexShmak/wb_test_task_l0/cmd/worker"
 	"github.com/AlexShmak/wb_test_task_l0/internal/auth"
-	"log"
+	"github.com/AlexShmak/wb_test_task_l0/internal/kafka"
 	"log/slog"
+	"os"
 
 	"github.com/AlexShmak/wb_test_task_l0/internal/config"
 	"github.com/AlexShmak/wb_test_task_l0/internal/db"
@@ -21,16 +22,18 @@ func main() {
 	// read config
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		slog.Error("failed to load config", "error", err)
+		os.Exit(1)
 	}
 
-	// setup slogLogger
+	// setup logger
 	slogLogger := logger.SetupLogger(cfg.Environment)
 
 	// connect to database
 	regularDB, err := db.Connect(cfg)
 	if err != nil {
-		log.Panic("Could not connect to database.")
+		slogLogger.Error("Could not connect to database", "error", err)
+		os.Exit(1)
 	}
 
 	// setup storage
@@ -40,21 +43,36 @@ func main() {
 		cfg.Database.URL,
 	)
 	if err != nil {
-		log.Fatalf("Could not create migration instance: %v", err)
+		slogLogger.Error("Could not create migration instance", "error", err)
+		os.Exit(1)
 	}
 	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		log.Fatalf("Could not apply migrations: %v", err)
+		slogLogger.Error("Could not apply migrations", "error", err)
+		os.Exit(1)
 	}
 	slogLogger.Info("Migrations applied successfully.")
 	postgresStorage := storage.NewPostgresStorage(regularDB)
 
-	go worker.StartWorker(cfg)
+	go worker.StartWorker(cfg, postgresStorage, slogLogger)
+
+	// setup kafka producer
+	kafkaProducer, err := kafka.NewProducer(cfg, slogLogger)
+	if err != nil {
+		slogLogger.Error("failed to create kafka producer", "error", err)
+		os.Exit(1)
+	}
+	defer func() {
+		if err := kafkaProducer.Close(); err != nil {
+			slogLogger.Error("failed to close kafka producer", "error", err)
+		}
+	}()
 
 	// setup router
 	jwtService := auth.NewJWTService(cfg.JWT.AccessSecret, cfg.JWT.RefreshSecret)
-	r := router.NewRouter(postgresStorage, slogLogger, jwtService, cfg)
+	r := router.NewRouter(postgresStorage, slogLogger, jwtService, cfg, kafkaProducer)
 	if err := r.Run(cfg.Server.Host + ":" + cfg.Server.Port); err != nil {
-		log.Fatalf("Error starting r: %v", err)
+		slogLogger.Error("Error starting r", "error", err)
+		os.Exit(1)
 	}
 
 	slogLogger.Info("Router started.", slog.String("env", cfg.Environment))
