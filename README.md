@@ -1,3 +1,5 @@
+[![golangci-lint](https://github.com/AlexShmak/order-service/actions/workflows/golangci-lint.yml/badge.svg?branch=main)](https://github.com/AlexShmak/order-service/actions/workflows/golangci-lint.yml)
+
 # Сервис заказов
 
 Этот проект представляет собой сервис для получения информации о заказах. Он включает в
