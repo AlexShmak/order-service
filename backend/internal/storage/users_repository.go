@@ -17,7 +17,7 @@ type User struct {
 	passwordHash []byte
 }
 
-func (u *User) hashPassword() error {
+func (u *User) HashPassword() error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ type UsersRepository struct {
 
 func (s *UsersRepository) Create(ctx context.Context, user *User) error {
 
-	if err := user.hashPassword(); err != nil {
+	if err := user.HashPassword(); err != nil {
 		return err
 	}
 
