@@ -1,7 +1,7 @@
 package kafka
 
 import (
-	"github.com/AlexShmak/wb_test_task_l0/internal/config"
+	"github.com/AlexShmak/order-service/internal/config"
 	"github.com/IBM/sarama"
 	"log/slog"
 )

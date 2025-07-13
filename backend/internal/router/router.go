@@ -1,16 +1,16 @@
 package router
 
 import (
-	"github.com/AlexShmak/wb_test_task_l0/internal/config"
-	"github.com/AlexShmak/wb_test_task_l0/internal/kafka"
-	"github.com/AlexShmak/wb_test_task_l0/internal/storage/cache"
+	"github.com/AlexShmak/order-service/internal/config"
+	"github.com/AlexShmak/order-service/internal/kafka"
+	"github.com/AlexShmak/order-service/internal/storage/cache"
 	"log/slog"
 	"time"
 
-	"github.com/AlexShmak/wb_test_task_l0/internal/auth"
-	"github.com/AlexShmak/wb_test_task_l0/internal/handlers"
+	"github.com/AlexShmak/order-service/internal/auth"
+	"github.com/AlexShmak/order-service/internal/handlers"
 
-	"github.com/AlexShmak/wb_test_task_l0/internal/storage"
+	"github.com/AlexShmak/order-service/internal/storage"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )

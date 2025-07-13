@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/AlexShmak/wb_test_task_l0/internal/storage"
+	"github.com/AlexShmak/order-service/internal/storage"
 	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"

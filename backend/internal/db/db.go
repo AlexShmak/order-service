@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/AlexShmak/wb_test_task_l0/internal/config"
+	"github.com/AlexShmak/order-service/internal/config"
 )
 
 func Connect(config *config.Config) (*sql.DB, error) {

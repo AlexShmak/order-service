@@ -2,7 +2,7 @@ package cache
 
 import (
 	"context"
-	"github.com/AlexShmak/wb_test_task_l0/internal/storage"
+	"github.com/AlexShmak/order-service/internal/storage"
 	"github.com/redis/go-redis/v9"
 )
 
