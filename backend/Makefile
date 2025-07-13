@@ -21,9 +21,3 @@ migrate-up:
 
 migrate-down:
 	@$(MIGRATE_CMD) down
-
-start:
-	@docker compose up --build
-
-stop:
-	@docker compose down
